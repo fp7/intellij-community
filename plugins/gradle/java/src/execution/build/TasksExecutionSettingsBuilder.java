@@ -125,6 +125,9 @@ public class TasksExecutionSettingsBuilder {
 
     List<Module> affectedModules = new SmartList<>();
     Map<Module, String> rootPathsMap = FactoryMap.create(module -> notNullize(resolveProjectPath(module)));
+
+    String buildSrcRootProjectPath = null;
+
     for (ProjectTask projectTask : projectTasks) {
       if (!(projectTask instanceof ModuleBuildTask moduleBuildTask)) continue;
 
@@ -149,6 +152,7 @@ public class TasksExecutionSettingsBuilder {
 
       // all buildSrc runtime projects will be built by gradle implicitly
       if (gradleModuleData.isBuildSrcModule()) {
+        buildSrcRootProjectPath = rootProjectPath;
         continue;
       }
 
@@ -203,6 +207,10 @@ public class TasksExecutionSettingsBuilder {
           buildRootTasks.add(taskPathPrefix + assembleTask);
         }
       }
+    }
+
+    if (buildTasksMap.isEmpty() && buildSrcRootProjectPath != null) {
+      buildTasksMap.getModifiable(buildSrcRootProjectPath).add("help");
     }
     return affectedModules;
   }
